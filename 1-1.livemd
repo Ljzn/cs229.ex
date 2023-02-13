@@ -1,7 +1,63 @@
 # CS229-1-1
 
-## Section
+```elixir
+Mix.install(
+  [
+    {:nx, "~> 0.2"},
+    {:nimble_csv, "~> 1.2"},
+    {:kino, "~> 0.8"},
+    {:kino_vega_lite, "~> 0.1"},
+    {:exla, "~> 0.2"}
+  ],
+  config: [
+    nx: [default_backend: EXLA.Backend]
+  ]
+)
+```
+
+## Plot dataset
 
 ```elixir
+defmodule Dataset do
+  def read_csv(url, headers \\ false) do
+    {:ok, _} = Application.ensure_all_started(:inets)
+    {:ok, _} = Application.ensure_all_started(:ssl)
 
+    [hs | data] =
+      url
+      |> :httpc.request()
+      |> then(fn
+        {:ok, {_, _, data}} ->
+          IO.iodata_to_binary(data)
+      end)
+      |> NimbleCSV.RFC4180.parse_string(skip_headers: false)
+
+    if headers do
+      data
+      |> Enum.map(fn x ->
+        Enum.zip(hs, x)
+        |> Enum.into(%{})
+        |> Map.take(headers)
+      end)
+    else
+      data
+    end
+  end
+end
+```
+
+```elixir
+url = "https://www.openintro.org/stat/data/ames.csv"
+dataset = Dataset.read_csv(url, ["Gr.Liv.Area", "SalePrice", "Yr.Sold", "MS.SubClass"])
+```
+
+```elixir
+alias VegaLite, as: Vl
+
+Vl.new(width: 500, height: 400)
+|> Vl.mark(:point)
+|> Vl.data_from_values(dataset)
+|> Vl.transform(filter: "datum['MS.SubClass'] == 60 & datum['Yr.Sold'] == 2010")
+|> Vl.encode_field(:y, "SalePrice", type: :quantitative)
+|> Vl.encode_field(:x, "['Gr.Liv.Area']", type: :quantitative, scale: [zero: false])
 ```
