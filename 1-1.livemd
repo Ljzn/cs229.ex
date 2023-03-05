@@ -1,4 +1,4 @@
-# CS229-1-1
+# CS229-Part1-Supervised-learning
 
 ```elixir
 Mix.install(
@@ -15,7 +15,7 @@ Mix.install(
 )
 ```
 
-## Plot dataset
+## Helper Module to parsing CSV
 
 ```elixir
 defmodule Dataset do
@@ -46,6 +46,8 @@ defmodule Dataset do
 end
 ```
 
+## We have a dataset
+
 ```elixir
 url = "https://www.openintro.org/stat/data/ames.csv"
 
@@ -53,6 +55,8 @@ dataset =
   Dataset.read_csv(url, ["Gr.Liv.Area", "SalePrice", "Yr.Sold", "MS.SubClass", "Bedroom.AbvGr"])
   |> Enum.filter(fn d -> d["Yr.Sold"] == "2010" end)
 ```
+
+## Let's plot the data
 
 ```elixir
 alias VegaLite, as: Vl
@@ -64,7 +68,42 @@ Vl.new(width: 500, height: 400)
 |> Vl.encode_field(:x, "['Gr.Liv.Area']", type: :quantitative, scale: [zero: false])
 ```
 
+## Notation
+
+### features
+
+$x^{(i)}$
+
+### target
+
+$y^{(i)}$
+
+### training example
+
+$(x^{(i)},y^{(i)})$
+
+### training set
+
+$\{(x^{(i)},y^{(i)});i=1,...,n\}$
+
 ### hypothesis
+
+```mermaid
+graph TD;
+    A(Training set)-->B(Learning algorithm)
+    subgraph hypothesis
+        direction LR
+        D(x)-->h
+        h-->E(predicted y)
+    end
+    B-->hypothesis
+```
+
+When the target variable that we're predict is continuous, we call the learning problem a **regression** problem.
+
+When y can take on only a small number of discrete values, we call it a **classification** problem.
+
+## Chapter 1 Linear regression
 
 $h(x) = \sum_{i=0}^{d}\theta_ix_i = \theta^Tx$
 
