@@ -1,4 +1,4 @@
-# CS229-Part1-Supervised-learning
+# Part1 Supervised learning - Chapter 1 Linear regression
 
 ```elixir
 Mix.install(
@@ -103,7 +103,13 @@ When the target variable that we're predict is continuous, we call the learning 
 
 When y can take on only a small number of discrete values, we call it a **classification** problem.
 
-## Chapter 1 Linear regression
+<!-- livebook:{"break_markdown":true} -->
+
+### parameters (also called weights)
+
+$\theta_i$
+
+### approximate y as a linear function of x
 
 $h(x) = \sum_{i=0}^{d}\theta_ix_i = \theta^Tx$
 
@@ -111,13 +117,85 @@ $h(x) = \sum_{i=0}^{d}\theta_ix_i = \theta^Tx$
 
 $J(\theta) = \dfrac{1}{2}\sum_{i=1}^{n}(h_\theta(x^{(i)})-y^{(i)})^2$
 
+If you've seen linear regression before, you may recognize this as the familiar least-squares cost function that gives rise to the **ordinary least squares** regression model.
+
 ### gradient descent
 
 $\theta_j:=\theta_j-\alpha\dfrac{\partial}{\partial\theta_j}J(\theta)$
 
-### update
+Here, alpha is called the **learning rate**.
 
-$\theta:=\theta+\alpha\sum_{i=1}^{n}(y^{(i)}-h_\theta(x^{(i)}))x^{(i)}$
+### batch gradient descent
+
+Looks at every example in the entire training set on every step.
+
+### stochastic gradient descent (also incremental gradient descent)
+
+Each time we encounter a training example, we update the parameters according to the gradient of the error with respect to that single training example only.
+
+### Matrix derivatives
+
+For a function $f$ : $\mathbb{R}^{n\times d}\mapsto\mathbb{R}$ mapping from n-by-d matrices to the real numbers, we define the derivative of $f$ with respect to $A$ to be:
+
+$\nabla_Af(A) = \begin{bmatrix}
+\dfrac{\partial f}{\partial A_{11}} & \dots & \dfrac{\partial f}{\partial A_{1d}}\\
+\vdots & \ddots & \vdots\\
+\dfrac{\partial f}{\partial A_{n1}} & \dots & \dfrac{\partial f}{\partial A_{nd}}
+\end{bmatrix}$
+
+Thus, the gradient $\nabla_Af(A)$ is itself an n-by-d matrix, whose $(i, j)$-element is $\dfrac{\partial f}{\partial A_{ij}}$.
+
+## Least squares revisited
+
+Given a training set, define the **design matrix** $X$ to be the n-by-d matrix that contains the training examples' input values in its rows:
+
+$X = \begin{bmatrix}
+\textit{---}&(x^{(1)})^T&\textit{---}\\
+\textit{---}&(x^{(2)})^T&\textit{---}\\
+&\vdots\\
+\textit{---}&(x^{(n)})^T&\textit{---}\\
+\end{bmatrix}$
+
+Also, let $\vec{y}$ by the n-dimensional vector containing all the target values from the training set:
+
+$\vec{y} = \begin{bmatrix}
+y^{(1)}\\
+y^{(2)}\\
+\vdots\\
+y^{(n)}\\
+\end{bmatrix}$
+
+The value of $\theta$ that minimizes $J(\theta)$ is given in closed form by the equation
+
+$\theta=(X^TX)^{-1}X^T\vec{y}$
+
+## Probabilistic interpretation
+
+Given $X$ and $\theta$, what is the distribution of the $y^(i)$'s? The probability of the data is given by $p(\vec{y}|X;\theta)$. This quantity is typically viewed a function of $\vec{y}$ (and perhaps $X$), for a fixed value of $\theta$. When we wish to explicityly view this as a function of $\theta$, we will instead call it the **likelihood** function:
+
+$L(\theta)=L(\theta;X,\vec{y})=p(\vec{y}|X;\theta)$
+
+### maximum likelihood
+
+Choose $\theta$ so as to make the data as high probability as possible.
+
+### log likelihood
+
+$\ell(\theta)$
+
+## Locally weighted linear regression
+
+$w^{(i)}$'s are non-negative valued **weights**.
+
+A fairly standard choice for the weights is
+
+$w^{(i)}=exp(-\dfrac{(x^{(i)}-x)^{2}}{2\tau^{2}})$
+
+The parameter $\tau$ controls how quickly the weight of a training example falls off with distance of its $x^(i)$ from the query point $x$; $\tau$ is called the **bandwidth** parameter.
+
+Locally weightted linear regression is a **non-parametric** algorithm.
+
+## Practise: batch gradient descent
 
 ```elixir
 defmodule LinReg do
